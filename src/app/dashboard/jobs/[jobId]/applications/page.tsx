@@ -42,13 +42,13 @@ interface ApplicationWithProfile extends Application {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     jobId: string;
-  };
+  }>;
 }
 
 export default function JobApplicationsPage({ params }: PageProps) {
-  const { jobId } = params;
+  const [jobId, setJobId] = useState<string>('');
   const { user } = useSupabaseUser();
   const { profile, loading: profileLoading } = useUserProfile();
   const router = useRouter();
@@ -58,6 +58,13 @@ export default function JobApplicationsPage({ params }: PageProps) {
   const [applications, setApplications] = useState<ApplicationWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // Resolve params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setJobId(resolvedParams.jobId);
+    });
+  }, [params]);
 
   // Check if user is recruiter
   useEffect(() => {
@@ -69,7 +76,7 @@ export default function JobApplicationsPage({ params }: PageProps) {
 
   // Fetch job and applications
   useEffect(() => {
-    if (!user || !profile || profile.role !== 'client') return;
+    if (!user || !profile || profile.role !== 'client' || !jobId) return;
 
     const fetchData = async () => {
       try {

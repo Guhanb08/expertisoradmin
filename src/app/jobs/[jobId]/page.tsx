@@ -32,13 +32,13 @@ interface Application {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     jobId: string;
-  };
+  }>;
 }
 
 export default function JobDetailPage({ params }: PageProps) {
-  const { jobId } = params;
+  const [jobId, setJobId] = useState<string>('');
   const { user } = useSupabaseUser();
   const { profile, loading: profileLoading } = useUserProfile();
   const router = useRouter();
@@ -49,8 +49,16 @@ export default function JobDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
 
+  // Resolve params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setJobId(resolvedParams.jobId);
+    });
+  }, [params]);
+
   // Fetch job and check if user has applied
   useEffect(() => {
+    if (!jobId) return;
     const fetchData = async () => {
       try {
         // Fetch job details

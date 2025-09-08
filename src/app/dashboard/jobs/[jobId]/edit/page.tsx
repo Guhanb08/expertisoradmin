@@ -26,13 +26,13 @@ interface Job {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     jobId: string;
-  };
+  }>;
 }
 
 export default function EditJobPage({ params }: PageProps) {
-  const { jobId } = params;
+  const [jobId, setJobId] = useState<string>('');
   const { user } = useSupabaseUser();
   const { profile, loading: profileLoading } = useUserProfile();
   const router = useRouter();
@@ -48,6 +48,13 @@ export default function EditJobPage({ params }: PageProps) {
     is_public: true
   });
 
+  // Resolve params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setJobId(resolvedParams.jobId);
+    });
+  }, [params]);
+
   // Check if user is recruiter
   useEffect(() => {
     if (!profileLoading && profile && profile.role !== 'client') {
@@ -58,7 +65,7 @@ export default function EditJobPage({ params }: PageProps) {
 
   // Fetch job data
   useEffect(() => {
-    if (!user || !profile || profile.role !== 'client') return;
+    if (!user || !profile || profile.role !== 'client' || !jobId) return;
 
     const fetchJob = async () => {
       try {
