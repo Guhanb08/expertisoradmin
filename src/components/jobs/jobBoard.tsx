@@ -87,7 +87,6 @@ export default function JobBoard() {
         const { data, error } = await supabase
           .from('jobs')
           .select('*')
-          .eq('is_public', true) // Only show public jobs on the main page
           .order('created_at', { ascending: false });
 
         if (error) throw error;

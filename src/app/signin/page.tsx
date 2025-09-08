@@ -184,9 +184,9 @@ export default function SignInPage() {
           
           <div className="mt-6">
             <div className="flex  flex-wrap gap-2">
-              {testUsers.map((user) => (
+              {testUsers.map((user , index) => (
                 <Button
-                  key={user.role}
+                  key={index}
                   type="button"
                   size="sm"
                   variant="outline"

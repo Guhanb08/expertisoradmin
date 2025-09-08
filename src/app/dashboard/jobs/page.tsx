@@ -56,13 +56,13 @@ export default function JobsPage() {
         let query = supabase.from('jobs').select('*');
         
         // If recruiter (client), only show their jobs
-        if (profile.role === 'client') {
+       /*  if (profile.role === 'client') {
           query = query.eq('created_by', user.id);
         }
         // If candidate, only show public jobs
         else if (profile.role === 'candidate') {
           query = query.eq('is_public', true);
-        }
+        } */
         // If admin, show all jobs (no filter needed)
         
         query = query.order('created_at', { ascending: false });

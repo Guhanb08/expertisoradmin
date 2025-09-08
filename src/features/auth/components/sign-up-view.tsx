@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'Authentication forms built using the components.'
 };
 
-export default function SignUpViewPage({ stars }: { stars: number }) {
+export default function SignUpViewPage({ stars }: { stars: number }) : never {
   // Redirect to sign-in page (no sign-up page created yet)
   redirect('/signin');
 }

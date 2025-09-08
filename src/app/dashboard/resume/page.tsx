@@ -277,7 +277,6 @@ export default function ResumePage() {
               <div className="space-y-4">
                 <Label>Upload Resume File (PDF, DOC, DOCX)</Label>
                 <FileUploader
-                  onValueChange={handleFileUpload}
                   maxFiles={1}
                   maxSize={5 * 1024 * 1024} // 5MB
                   accept={{
