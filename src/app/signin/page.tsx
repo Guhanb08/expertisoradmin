@@ -7,17 +7,53 @@ import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Icons } from '@/components/icons';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const supabase = createClient();
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Dummy sign in - just redirect back to home
-    router.push('/');
+    setError('');
+
+    // Basic validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (signInError) {
+        throw new Error(signInError.message);
+      }
+
+      if (data && data.user) {
+        toast.success('Login successful!');
+        router.push('/dashboard/overview'); // Redirect to dashboard after successful login
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackToHome = () => {
@@ -55,6 +91,7 @@ export default function SignInPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
                 required
               />
             </div>
@@ -68,6 +105,7 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pr-10"
+                  disabled={loading}
                   required
                 />
                 <Button
@@ -76,6 +114,7 @@ export default function SignInPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                 >
                   {showPassword ? (
                     <Icons.eyeOff className="h-4 w-4 text-muted-foreground" />
@@ -85,15 +124,25 @@ export default function SignInPage() {
                 </Button>
               </div>
             </div>
+            
+            {error && (
+              <Alert variant="destructive">
+                <Icons.warning className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
             <div className="space-y-3 pt-4">
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
               <Button 
                 type="button" 
                 variant="outline" 
                 className="w-full"
                 onClick={handleBackToHome}
+                disabled={loading}
               >
                 Back to Home
               </Button>
