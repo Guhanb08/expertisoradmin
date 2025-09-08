@@ -10,6 +10,7 @@ import {
 export const job = pgTable("jobs", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: varchar("title"),
+  thumbnail: varchar("thumbnail"),
   description: text("description"),
   isPublic: boolean("is_public").notNull().default(true),
   createdBy: uuid("created_by").notNull(),
