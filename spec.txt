@@ -1,0 +1,36 @@
+
+3. on home page you see all the jobs  from jobs table is public  
+2. next we have candidate button , recuriter button , admin button
+3. on click candidate button we will redirect to candidate signup page with below link sign in 
+4. on click recuriter button we will redirect to recuriter signup page with below link sign in 
+5. on click admin button we will redirect to admin login page
+--- 
+recruite functionalliy 
+
+__
+1. recruiter can create a new job  therir job not all the job
+2. recruiter can update a job their jobb
+3. recruiter can see all the application for their job
+4. recruiter can shortlist the application
+5. recruiter can reject the application
+
+__
+candidate functionalliy 
+1. candidate can create a new resume
+2. candidate can update a resume
+3. candidate can see all the job
+4. candidate can apply for a job
+5. candiacate can see all the applied jobs 
+
+--
+
+user admin 
+ 
+
+2. admin can see all the job
+3. admin can see all the application
+4. admin can see all the resume
+5. admin can see all the user
+
+update delete anything 
+--
