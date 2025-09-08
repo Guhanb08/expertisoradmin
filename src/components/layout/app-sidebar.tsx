@@ -29,6 +29,7 @@ import {
   SidebarRail
 } from '@/components/ui/sidebar';
 import { navItems } from '@/constants/data';
+import { NavItem } from '@/types';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSupabaseUser } from '@/hooks/use-supabase-user';
 import { useUserProfile } from '@/hooks/use-user-profile';
@@ -108,6 +109,94 @@ export default function AppSidebar() {
 
   const activeTenant = tenants[0];
 
+  // Get role-based navigation items
+  const getRoleBasedNavItems = (): NavItem[] => {
+    if (!profile) return [];
+
+    const roleBasedItems: NavItem[] = [
+      {
+        title: 'Dashboard',
+        url: '/dashboard/overview',
+        icon: 'dashboard',
+        isActive: false,
+        shortcut: ['d', 'd'],
+        items: []
+      }
+    ];
+
+    // Add role-specific items
+    if (profile.role === 'candidate') {
+      roleBasedItems.push({
+        title: 'My Resume',
+        url: '/dashboard/resume',
+        icon: 'post',
+        shortcut: ['r', 'r'],
+        isActive: false,
+        items: []
+      });
+      roleBasedItems.push({
+        title: 'My Applications',
+        url: '/dashboard/applications',
+        icon: 'user',
+        shortcut: ['a', 'a'],
+        isActive: false,
+        items: []
+      });
+      roleBasedItems.push({
+        title: 'Browse Jobs',
+        url: '/dashboard/jobs',
+        icon: 'product',
+        shortcut: ['j', 'j'],
+        isActive: false,
+        items: []
+      });
+    } else if (profile.role === 'client') {
+      roleBasedItems.push({
+        title: 'My Jobs',
+        url: '/dashboard/jobs',
+        icon: 'product',
+        shortcut: ['j', 'j'],
+        isActive: false,
+        items: []
+      });
+    } else if (profile.role === 'admin') {
+      roleBasedItems.push({
+        title: 'Jobs Management',
+        url: '/dashboard/jobs',
+        icon: 'product',
+        shortcut: ['j', 'j'],
+        isActive: false,
+        items: []
+      });
+      roleBasedItems.push({
+        title: 'Users',
+        url: '/dashboard/users',
+        icon: 'user',
+        shortcut: ['u', 'u'],
+        isActive: false,
+        items: []
+      });
+    }
+
+    // Add common items
+    roleBasedItems.push({
+      title: 'Account',
+      url: '#',
+      icon: 'billing',
+      isActive: true,
+      items: [
+        {
+          title: 'Profile',
+          url: '/dashboard/profile',
+          icon: 'userPen',
+          shortcut: ['m', 'm']
+        }
+      ]
+    });
+
+    return roleBasedItems;
+  };
+
   React.useEffect(() => {
     // Side effects based on sidebar state changes
   }, [isOpen]);
@@ -125,7 +214,7 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
           <SidebarMenu>
-            {navItems.map((item) => {
+            {getRoleBasedNavItems().map((item) => {
               const Icon = item.icon ? Icons[item.icon] : Icons.logo;
               return item?.items && item?.items?.length > 0 ? (
                 <Collapsible

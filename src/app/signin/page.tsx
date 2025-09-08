@@ -26,7 +26,7 @@ export default function SignInPage() {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (!userLoading && user) {
-      router.push('/dashboard/overview');
+      router.push('/dashboard/jobs');
     }
   }, [user, userLoading, router]);
 
@@ -54,7 +54,7 @@ export default function SignInPage() {
 
       if (data && data.user) {
         toast.success('Login successful!');
-        router.push('/dashboard/overview'); // Redirect to dashboard after successful login
+        router.push('/dashboard/jobs'); // Redirect to dashboard after successful login
       }
     } catch (error: any) {
       const errorMessage = error.message || 'Login failed. Please try again.';
@@ -77,7 +77,12 @@ export default function SignInPage() {
   const testUsers = [
     { role: 'Admin', email: 'admin@jobs.com', password: 'admin', color: 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300' },
     { role: 'Candidate', email: 'candidate@jobs.com', password: 'candidate', color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200' },
-    { role: 'Client', email: 'client@jobs.com', password: 'client', color: 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200' }
+    { role: 'Candidate', email: 'candidate1@jobs.com', password: 'candidate1', color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200' },
+    { role: 'Client', email: 'client@jobs.com', password: 'client', color: 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200' },
+    { role: 'Client', email: 'client1@jobs.com', password: 'client1', color: 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200' },
+    { role: 'Client', email: 'client2@jobs.com', password: 'client2', color: 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200' }
+
+
   ];
 
   // Show loading while checking authentication
@@ -178,7 +183,7 @@ export default function SignInPage() {
           </form>  
           
           <div className="mt-6">
-            <div className="grid grid-cols-1 gap-2">
+            <div className="flex  flex-wrap gap-2">
               {testUsers.map((user) => (
                 <Button
                   key={user.role}
@@ -188,7 +193,7 @@ export default function SignInPage() {
                   className={`${user.color} text-xs font-medium`}
                   onClick={() => fillCredentials(user.email, user.password)}
                 >
-                  {user.role}: {user.email} / {user.password}
+                 {user.password}
                 </Button>
               ))}
             </div>

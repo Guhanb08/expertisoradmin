@@ -43,6 +43,13 @@
       "when": 1757336517279,
       "tag": "0005_serious_phalanx",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757343048267,
+      "tag": "0006_happy_starbolt",
+      "breakpoints": true
     }
   ]
 }

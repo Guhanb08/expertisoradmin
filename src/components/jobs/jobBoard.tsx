@@ -1,113 +1,195 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { createClient } from '@/lib/supabase/client';
+import { Icons } from '@/components/icons';
+import { toast } from 'sonner';
 
-// Mock job data based on job schema
-const mockJobs = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440001",
-    title: "Frontend Developer",
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/380256505/original/3cf737dfc09ec01f92ab8bb8ea4a09c7c95253b6.png",
-    description: "Looking for an experienced frontend developer to build a modern React application with TypeScript and Tailwind CSS.",
-    isPublic: true,
-    createdBy: "550e8400-e29b-41d4-a716-446655440002",
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T10:30:00Z"
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440003",
-    title: "UI/UX Designer",
-    description: "Seeking a creative UI/UX designer to design mobile app interfaces and create interactive prototypes.",
-    isPublic: true,
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/240890002/original/359842d17c1daa3d878d225a07c98fdb87291303.png",  
-    createdBy: "550e8400-e29b-41d4-a716-446655440004",
-    createdAt: "2024-01-14T14:20:00Z",
-    updatedAt: "2024-01-14T14:20:00Z"
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440005",
-    title: "Backend Developer",
-    description: "Need a backend developer with Node.js and PostgreSQL experience to build scalable APIs.",
-    isPublic: true,
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/205691936/original/ecd4846d5c839df886b0dbb777ca174f0538a696.png",  
-        createdBy: "550e8400-e29b-41d4-a716-446655440006",
-    createdAt: "2024-01-13T09:15:00Z",
-    updatedAt: "2024-01-13T09:15:00Z"
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440007",
-    title: "Graphic Designer",
-    description: "Looking for a talented graphic designer to create brand identity and marketing materials.",
-    isPublic: true,
-    createdBy: "550e8400-e29b-41d4-a716-446655440008",
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/300273148/original/ad2f8ea91513ab98e76aaa2d8ddaee79ab598fb6.jpg",  
-    createdAt: "2024-01-12T16:45:00Z",
-    updatedAt: "2024-01-12T16:45:00Z"
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440009",
-    title: "Content Writer",
-    description: "Seeking an experienced content writer to create engaging blog posts and website copy.",
-    isPublic: false,
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/424365813/original/e10a8d08f1565856a1b4647c2f773f1e7013ed4d.png",  
-    createdBy: "550e8400-e29b-41d4-a716-446655440010",
-    createdAt: "2024-01-11T11:30:00Z",
-    updatedAt: "2024-01-11T11:30:00Z"
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440011",
-    title: "DevOps Engineer",
-    description: "Need a DevOps engineer to set up CI/CD pipelines and manage cloud infrastructure.",
-    isPublic: true,
-    thumbnail: "https://fiverr-res.cloudinary.com/t_gig_cards_web_x2,q_auto,f_auto/gigs/321892047/original/c6652df8704d8e679854f71a45da16d0a6f49bc4.png",  
-    createdBy: "550e8400-e29b-41d4-a716-446655440012",
-    createdAt: "2024-01-10T13:20:00Z",
-    updatedAt: "2024-01-10T13:20:00Z"
-  }
-];
+interface Job {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+  description: string;
+  is_public: boolean;
+  createdBy: string;
+  created_at: string;
+  updatedAt: string;
+}
 
-const JobCard = ({ job }: { job: typeof mockJobs[0] }) => {
+const JobCard = ({ job }: { job: Job }) => {
+    console.log(job);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  const handleJobClick = () => {
+    window.location.href = `/jobs/${job.id}`;
+  };
+
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer pt-0">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer pt-0" onClick={handleJobClick}>
       {/* Image placeholder */}
-      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-        <img src={job.thumbnail} alt={job.title} style={{borderTopLeftRadius: "10px", borderTopRightRadius: "10px"}}/>
+      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-t-lg overflow-hidden">
+        {job.thumbnail ? (
+          <img 
+            src={job.thumbnail} 
+            alt={job.title} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-100 to-blue-200">
+            <Icons.product className="h-12 w-12 text-blue-400" />
+          </div>
+        )}
       </div>
 
-      <CardHeader >
-        <CardTitle className="text-lg">{job.title}</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
       </CardHeader>
 
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
           {job.description}
         </p>
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Created: {formatDate(job.createdAt)}</span>
-          <span className={job.isPublic ? "text-green-600" : "text-orange-600"}>
-            {job.isPublic ? "Public" : "Private"}
-          </span>
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <span>Created: {formatDate(job.created_at)}</span>
+          <Badge variant={job.is_public ? "default" : "secondary"} className="text-xs">
+            {job.is_public ? "Public" : "Private"}
+          </Badge>
         </div>
-        
       </CardContent>
     </Card>
   );
 };
 
 export default function JobBoard() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  
+  const supabase = createClient();
+
+  // Fetch jobs from database
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('is_public', true) // Only show public jobs on the main page
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        setJobs(data || []);
+      } catch (error: any) {
+        console.error('Error fetching jobs:', error);
+        setError('Failed to load jobs');
+        toast.error('Failed to load jobs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [supabase]);
+
+  // Filter jobs based on search term
+  const filteredJobs = jobs.filter(job =>
+    job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-center py-12">
+          <Icons.spinner className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Icons.warning className="h-12 w-12 text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Error Loading Jobs</h3>
+            <p className="text-muted-foreground text-center mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4">
-      {/* Job Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {mockJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="max-w-md mx-auto">
+          <Input
+            placeholder="Search jobs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+        </div>
       </div>
+
+      {/* Job Stats */}
+      <div className="mb-6 text-center">
+        <p className="text-muted-foreground">
+          {searchTerm 
+            ? `${filteredJobs.length} job${filteredJobs.length !== 1 ? 's' : ''} found`
+            : `${jobs.length} job${jobs.length !== 1 ? 's' : ''} available`
+          }
+        </p>
+      </div>
+
+      {/* Job Grid */}
+      {filteredJobs.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Icons.product className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              {searchTerm ? 'No jobs found' : 'No jobs available'}
+            </h3>
+            <p className="text-muted-foreground text-center mb-4">
+              {searchTerm 
+                ? 'Try adjusting your search terms or browse all available jobs.'
+                : 'Jobs will appear here when they are posted by recruiters.'
+              }
+            </p>
+            {searchTerm && (
+              <Button variant="outline" onClick={() => setSearchTerm('')}>
+                Clear Search
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredJobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
