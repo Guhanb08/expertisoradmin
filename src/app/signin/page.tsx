@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icons } from '@/components/icons';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSupabaseUser } from '@/hooks/use-supabase-user';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -18,8 +19,16 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { user, loading: userLoading } = useSupabaseUser();
 
   const supabase = createClient();
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (!userLoading && user) {
+      router.push('/dashboard/overview');
+    }
+  }, [user, userLoading, router]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +79,25 @@ export default function SignInPage() {
     { role: 'Candidate', email: 'candidate@jobs.com', password: 'candidate', color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200' },
     { role: 'Client', email: 'client@jobs.com', password: 'client', color: 'bg-green-50 hover:bg-green-100 text-green-700 border border-green-200' }
   ];
+
+  // Show loading while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center py-8">
+            <Icons.spinner className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Loading...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Don't render sign-in form if user is authenticated
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

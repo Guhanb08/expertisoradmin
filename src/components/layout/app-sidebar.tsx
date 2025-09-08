@@ -28,10 +28,12 @@ import {
   SidebarMenuSubItem,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navItems } from '@/constants/data';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useUser } from '@clerk/nextjs';
+import { useSupabaseUser } from '@/hooks/use-supabase-user';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { createClient } from '@/lib/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   IconBell,
   IconChevronRight,
@@ -41,7 +43,7 @@ import {
   IconPhotoUp,
   IconUserCircle
 } from '@tabler/icons-react';
-import { SignOutButton } from '@clerk/nextjs';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
@@ -62,10 +64,46 @@ const tenants = [
 export default function AppSidebar() {
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
-  const { user } = useUser();
+  const { user } = useSupabaseUser();
+  const { profile } = useUserProfile();
   const router = useRouter();
+  const supabase = createClient();
+  
   const handleSwitchTenant = (_tenantId: string) => {
     // Tenant switching functionality would be implemented here
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Signed out successfully');
+      router.push('/signin');
+    } catch (error) {
+      toast.error('Error signing out');
+    }
+  };
+
+  const getInitials = (email: string) => {
+    if (email.includes('@')) {
+      const username = email.split('@')[0];
+      return username.slice(0, 2).toUpperCase();
+    }
+    return email.slice(0, 2).toUpperCase();
+  };
+
+  const getUserRole = () => {
+    if (!profile) return 'User';
+    
+    switch (profile.role) {
+      case 'admin': return 'Admin';
+      case 'candidate': return 'Candidate';
+      case 'client': return 'Client';
+      default: return 'User';
+    }
+  };
+
+  const getUserDisplayName = () => {
+    return profile?.fullName || user?.email || 'User';
   };
 
   const activeTenant = tenants[0];
@@ -153,11 +191,18 @@ export default function AppSidebar() {
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
                   {user && (
-                    <UserAvatarProfile
-                      className='h-8 w-8 rounded-lg'
-                      showInfo
-                      user={user}
-                    />
+                    <div className='flex items-center gap-2'>
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
+                        <AvatarFallback className="bg-primary text-primary-foreground rounded-lg">
+                          {getInitials(user.email || '')}
+                        </AvatarFallback>
+                      </Avatar>
+                        <div className='grid flex-1 text-left text-sm leading-tight'>
+                          <span className='truncate font-semibold'>{getUserDisplayName()}</span>
+                          <span className='truncate text-xs'>{getUserRole()} • {user.email}</span>
+                        </div>
+                    </div>
                   )}
                   <IconChevronsDown className='ml-auto size-4' />
                 </SidebarMenuButton>
@@ -171,11 +216,18 @@ export default function AppSidebar() {
                 <DropdownMenuLabel className='p-0 font-normal'>
                   <div className='px-1 py-1.5'>
                     {user && (
-                      <UserAvatarProfile
-                        className='h-8 w-8 rounded-lg'
-                        showInfo
-                        user={user}
-                      />
+                      <div className='flex items-center gap-2'>
+                        <Avatar className="h-8 w-8 rounded-lg">
+                          <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
+                          <AvatarFallback className="bg-primary text-primary-foreground rounded-lg">
+                            {getInitials(user.email || '')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className='grid flex-1 text-left text-sm leading-tight'>
+                          <span className='truncate font-semibold'>{getUserDisplayName()}</span>
+                          <span className='truncate text-xs'>{getUserRole()} • {user.email}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </DropdownMenuLabel>
@@ -198,9 +250,9 @@ export default function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <IconLogout className='mr-2 h-4 w-4' />
-                  <SignOutButton redirectUrl='/auth/sign-in' />
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

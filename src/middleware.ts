@@ -1,11 +1,11 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
+export function middleware(request: NextRequest) {
+  // Simple middleware without Clerk authentication
+  // You can add custom logic here if needed
+  return NextResponse.next();
+}
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
-  if (isProtectedRoute(req)) await auth.protect();
-});
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
