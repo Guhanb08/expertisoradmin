@@ -1,0 +1,14 @@
+node_modules
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# clerk configuration (can include secrets)
+/.clerk/
+.next/
+.DS_Store
+.cursorrules
+.cursor/
+.vscode/
+next-env.d.ts
